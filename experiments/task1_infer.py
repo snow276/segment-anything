@@ -39,11 +39,11 @@ if __name__ == '__main__':
                                      'segmentation on BTCV using SAM')
     parser.add_argument('--target', type=int, default=0,
                         help='target to segment, if 0, segment all targets')
-    parser.add_argument('--data_dir', type=str, default='RawData',
+    parser.add_argument('--data_dir', type=str, default='../dataset/RawData/',
                         help='directory of the raw data')
     parser.add_argument('--device', type=str, default='cuda:0',
                         help='device to load model and data to')
-    parser.add_argument('--json_path', type=str, default='RawData/dataset_0.json',
+    parser.add_argument('--json_path', type=str, default='../dataset/RawData/dataset_0.json',
                         help='path of the json file that describes data')
     parser.add_argument('--point_prompt', type=str, nargs='*',
                         help='policy to add point prompt, can be a list of '
@@ -86,6 +86,9 @@ if __name__ == '__main__':
                 sam, data, label, next_range, 
                 args.point_prompt, args.bounding_box_prompt, args.box_margin
             )
+            # print()
+            # print(idx)
+            # print(batched_input)
             if len(batched_input) == 0:
                 segment_results.append(np.zeros((14, *label[..., next_range].shape), dtype=np.int8))
                 torch.cuda.empty_cache()

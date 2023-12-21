@@ -147,7 +147,7 @@ def show_box(box, ax: plt.Axes):
 Load pretrained SAM model and build SAM predictor, from official code of SAM.
 """
 def get_sam(model_type: str = 'vit_h',
-            sam_checkpoint: str = '../sam_vit_h_4b8939.pth',
+            sam_checkpoint: str = '../checkpoints/sam_vit_h_4b8939.pth',
             device: str = 'cuda:0'):
     sam = sam_model_registry[model_type](checkpoint=sam_checkpoint)
     sam.to(device=device)

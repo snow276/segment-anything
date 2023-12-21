@@ -21,11 +21,14 @@ def main(args: argparse.Namespace) -> None:
     samed = SAMed()
     samed.set_sam_model(args.model_type, args.checkpoint, args.device)
 
+    file = open(args.output_file, "w")
     # 在训练集上进行测试
     samed.test(train_image, train_label, args.point_prompt, args.multi_point, args.background_point,
-               args.box_prompt, args.box_margin, tag="training data")
+               args.box_prompt, args.box_margin, args.batch_size, file, tag="training data")
 
     # 在测试集上进行测试
+
+    file.close()
 
 if __name__ == "__main__":
     # 解析参数

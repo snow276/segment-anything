@@ -16,11 +16,13 @@ class PromptGenerator:
         point_labels = None
 
         if box_prompt:
-            boxes = self.generate_box_prompt(label, box_margin)
+            boxes, targets = self.generate_box_prompt(label, box_margin)
+            if boxes is not None:
+                boxes = np.array(boxes)
         else:
             boxes = None
 
-        return point_coords, point_labels, boxes
+        return point_coords, point_labels, boxes, targets
 
 
     def generate_point_prompt(self,
@@ -33,6 +35,7 @@ class PromptGenerator:
                             label: np.ndarray, 
                             box_margin: int = 1):
         boxes = []
+        targets = []
 
         for i in range(1, 14):
             mask_i = (label == i)
@@ -49,9 +52,10 @@ class PromptGenerator:
             min_col = max(0, min_col - box_margin)
             max_col = min(label.shape[1], max_col + box_margin)            
 
-            boxes.append([min_row, min_col, max_row, max_col])
+            boxes.append([min_col, min_row, max_col, max_row])
+            targets.append(i)
 
         if len(boxes) == 0:
-            return None
+            boxes = None
         
-        return boxes
+        return boxes, targets

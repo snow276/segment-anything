@@ -22,6 +22,13 @@ def create_arg_parser():
     )
 
     parser.add_argument(
+        "--output_file",
+        type=str,
+        default="./experiments/results/out.txt",
+        help="The path to the output file."
+    )
+
+    parser.add_argument(
         "--point_prompt",
         type=str,
         default=None,
