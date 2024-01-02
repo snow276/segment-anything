@@ -20,7 +20,13 @@ def show_mask(mask, ax, random_color=False):
 def show_box(box, ax):
     x0, y0 = box[0], box[1]
     w, h = box[2] - box[0], box[3] - box[1]
-    ax.add_patch(plt.Rectangle((x0, y0), w, h, edgecolor='green', facecolor=(0,0,0,0), lw=2))  
+    ax.add_patch(plt.Rectangle((x0, y0), w, h, edgecolor='green', facecolor=(0,0,0,0), lw=2)) 
+
+def show_points(coords, labels, ax, marker_size=375):
+    pos_points = coords[labels==1]
+    neg_points = coords[labels==0]
+    ax.scatter(pos_points[:, 0], pos_points[:, 1], color='green', marker='*', s=marker_size, edgecolor='white', linewidth=1.25)
+    ax.scatter(neg_points[:, 0], neg_points[:, 1], color='red', marker='*', s=marker_size, edgecolor='white', linewidth=1.25)  
 
 class SAMed:
     def __init__(self) -> None:
@@ -39,11 +45,7 @@ class SAMed:
     def test(self, 
             image_set: list, 
             label_set: list, 
-            point_prompt: str, 
-            multi_point: bool, 
-            background_point: bool,
-            box_prompt: bool,
-            box_margin: int,
+            prompt_type: str,
             batch_size: int,
             file,
             tag: str) -> None:
@@ -60,8 +62,7 @@ class SAMed:
                 batch_range = range(batch_split[batch_num], batch_split[batch_num + 1])
 
                 batched_input, batched_targets = self.prepare_batched_input(
-                    images, labels, batch_range, point_prompt, multi_point, background_point,
-                    box_prompt, box_margin
+                    images, labels, batch_range, prompt_type
                 )
 
                 batched_output = self.sam(batched_input, multimask_output=False)
@@ -77,11 +78,7 @@ class SAMed:
                               images: np.ndarray, 
                               labels: np.ndarray,
                               batch_range: range,
-                              point_prompt: str = None,
-                              multi_point: bool = False,
-                              background_point: bool = False,
-                              box_prompt: bool = False,
-                              box_margin: int = 1) -> Tuple[List[Dict], List[List[int]]]:
+                              prompt_type: str) -> Tuple[List[Dict], List[List[int]]]:
         batched_input = [] 
         batched_targets = []
 
@@ -99,27 +96,41 @@ class SAMed:
             # print(f"box_prompt: {box_prompt}")
             point_coords, point_labels, boxes, targets = prompt_generator.generate_prompt(
                 label=label_i, 
-                point_prompt=point_prompt,
-                box_prompt=box_prompt,
-                box_margin=box_margin
+                prompt_type=prompt_type
             )
 
             # input_i['point_coords'] = point_coords
+            if point_coords is not None:
+                input_i['point_coords'] = resize_transform.apply_coords_torch(
+                    torch.from_numpy(point_coords).to(self.sam.device), image_i.shape[:2]
+                )
+
             # input_i['point_labels'] = point_labels
+            if point_labels is not None:
+                input_i['point_labels'] = torch.from_numpy(point_labels).to(self.sam.device)
+
             if boxes is not None:
                 # print(i)
-                input_i['boxes'] = resize_transform.apply_boxes_torch(torch.from_numpy(boxes).to(self.sam.device), image_i.shape[:2])
+                input_i['boxes'] = resize_transform.apply_boxes_torch(
+                    torch.from_numpy(boxes).to(self.sam.device), image_i.shape[:2]
+                )
             # input['boxes'] = resize_transform.apply_boxes_torch(boxes, image.shape[:2])
             batched_input.append(input_i)
             batched_targets.append(targets)
 
             # if i == 127:
             # # if True:
-            #     print(batched_input[127])
+            #     # print(batched_input[127])
             #     plt.figure(figsize=(10, 10))
             #     plt.imshow(images[..., 1, 127])
-            #     for box in boxes:
-            #         show_box(box, plt.gca())
+            #     # for box in boxes:
+            #     #     show_box(box, plt.gca())
+            #     print("point_coords :")
+            #     print(point_coords)
+            #     print("point_labels:")
+            #     print(point_labels)
+            #     for i in range(point_coords.shape[0]):
+            #         show_points(point_coords[i, :], point_labels[i, :], plt.gca())
             #     plt.axis('off')
             #     plt.savefig("plot.png")
 

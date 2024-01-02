@@ -29,36 +29,16 @@ def create_arg_parser():
     )
 
     parser.add_argument(
-        "--point_prompt",
+        "--prompt_type",
         type=str,
         default=None,
-        choices=['random', 'center'],
-        help="The type of point prompt, in ['random', 'center']."
-    )
-
-    parser.add_argument(
-        "--multi_point",
-        action="store_true",
-        help="Use multi-point prompt."
-    )
-
-    parser.add_argument(
-        "--background_point",
-        action="store_true",
-        help="Use random background-point prompt."
-    )
-
-    parser.add_argument(
-        "--box_prompt",
-        action="store_true",
-        help="Use bounding-box prompt."
-    )
-
-    parser.add_argument(
-        "--box_margin",
-        type=int,
-        default=1,
-        help="The margin of bounding-box prompt."
+        choices=['single_point_center', 'single_point_random', 
+                 'multi_point_center', 'multi_point_random', 
+                 'bounding_box_tight', 'bounding_box_loose'],
+        help="The type of point prompt, in [ \
+                'single_point_center', 'single_point_random', \
+                'multi_point_center', 'multi_point_random', \
+                'bounding_box_tight', 'bounding_box_loose']."
     )
 
     parser.add_argument(

@@ -14,8 +14,8 @@ def main(args: argparse.Namespace) -> None:
 
     # 加载数据集
     btcv_loader = BTCV_loader(args.json_path, args.data_path)
-    train_image, train_label = btcv_loader.load_data_with_label("training")
-    # valid_image, valid_label = btcv_loader.load_data_with_label("validation")
+    # train_image, train_label = btcv_loader.load_data_with_label("training")
+    valid_image, valid_label = btcv_loader.load_data_with_label("validation")
     
     # 加载模型
     samed = SAMed()
@@ -23,10 +23,10 @@ def main(args: argparse.Namespace) -> None:
 
     file = open(args.output_file, "w")
     # 在训练集上进行测试
-    samed.test(train_image, train_label, args.point_prompt, args.multi_point, args.background_point,
-               args.box_prompt, args.box_margin, args.batch_size, file, tag="training data")
+    # samed.test(train_image, train_label, args.prompt_type, args.batch_size, file, tag="training data")
 
     # 在测试集上进行测试
+    samed.test(valid_image, valid_label, args.prompt_type, args.batch_size, file, tag="training data")
 
     file.close()
 
