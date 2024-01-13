@@ -9,19 +9,6 @@ class PromptGenerator:
     def generate_prompt(self,
                         label: np.ndarray,  # ground truth
                         prompt_type: str):
-        # point prompt not implemented yet
-        # point_coords = None
-        # point_labels = None
-
-        # if box_prompt:
-        #     boxes, targets = self.generate_box_prompt(label, box_margin)
-        #     if boxes is not None:
-        #         boxes = np.array(boxes)
-        # else:
-        #     boxes = None
-
-        # return point_coords, point_labels, boxes, targets
-
         point_coords = []
         point_labels = []
         boxes = []
@@ -33,30 +20,36 @@ class PromptGenerator:
                 continue
             targets.append(i)
 
-            if prompt_type == "single_point_center":
+            if prompt_type == "single_point_center":  
+                # 对每个 ground truth mask，生成单点 point prompt，位于 mask 的中心
                 point_coord = self.generate_point_prompt(label=mask_i, num_points=1, center=True)
                 point_label = np.ones((point_coord.shape[0], ), dtype=np.int8)
                 point_coords.append(point_coord)
                 point_labels.append(point_label)
             elif prompt_type == "single_point_random":
+                # 对每个 ground truth mask，生成单点 point prompt，位于 mask 的随机位置
                 point_coord = self.generate_point_prompt(label=mask_i, num_points=1, center=False)
                 point_label = np.ones((point_coord.shape[0], ), dtype=np.int8)
                 point_coords.append(point_coord)
                 point_labels.append(point_label)
             elif prompt_type == "multi_point_center":
+                # 对每个 ground truth mask，生成多点 point prompt，其中一点位于 mask 的中心，其他随机
                 point_coord = self.generate_point_prompt(label=mask_i, num_points=3, center=True)
                 point_label = np.ones((point_coord.shape[0], ), dtype=np.int8)
                 point_coords.append(point_coord)
                 point_labels.append(point_label)
             elif prompt_type == "multi_point_random":
+                # 对每个 ground truth mask，生成多点 point prompt，都位于 mask 的随机位置
                 point_coord = self.generate_point_prompt(label=mask_i, num_points=3, center=False)
                 point_label = np.ones((point_coord.shape[0], ), dtype=np.int8)
                 point_coords.append(point_coord)
                 point_labels.append(point_label)
             elif prompt_type == "bounding_box_tight":
+                # 对每个 ground truth mask，生成一个紧贴 mask 边界框的 bounding box prompt
                 box = self.generate_box_prompt(label=mask_i, box_margin=1)
                 boxes.append(box)
             elif prompt_type == "bounding_box_loose":
+                # 对每个 ground truth mask，生成一个较 mask 边界框略大的 bounding box prompt
                 box = self.generate_box_prompt(label=mask_i, box_margin=10)
                 boxes.append(box)
 

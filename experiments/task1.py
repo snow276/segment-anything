@@ -21,6 +21,7 @@ def main(args: argparse.Namespace) -> None:
     samed = SAMed()
     samed.set_sam_model(args.model_type, args.checkpoint, args.device)
 
+    # 把运行结果输出到命令行指定的输出文件中
     file = open(args.output_file, "w")
     # 在训练集上进行测试
     # samed.test(train_image, train_label, args.prompt_type, args.batch_size, file, tag="training data")
