@@ -153,19 +153,20 @@ class SAMed:
             batched_input.append(input_i)
             batched_targets.append(targets)
 
-            # if i == 127:
+            # if i == 70:
             # # if True:
             #     # print(batched_input[127])
             #     plt.figure(figsize=(10, 10))
-            #     plt.imshow(images[..., 1, 127])
+            #     plt.imshow(images[..., 1, i])
             #     # for box in boxes:
             #     #     show_box(box, plt.gca())
             #     print("point_coords :")
-            #     print(point_coords)
+            #     print(point_coords.shape)
             #     print("point_labels:")
-            #     print(point_labels)
+            #     print(point_labels.shape)
+            #     print(np.argwhere(point_labels == 1))
             #     for i in range(point_coords.shape[0]):
-            #         show_points(point_coords[i, :], point_labels[i, :], plt.gca())
+            #         visualize.show_points(point_coords[i, :], point_labels[i, :], plt.gca())
             #     plt.axis('off')
             #     plt.savefig("plot.png")
 

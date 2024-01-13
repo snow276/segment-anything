@@ -1,0 +1,97 @@
+The segmentation result of sample 0:
+organ 1:	 mdice = 0.17362304194037392
+organ 2:	 mdice = 0.19590162742331912
+organ 3:	 mdice = 0.2851851030321851
+organ 4:	 mdice = nan
+organ 5:	 mdice = 0.04739997211766346
+organ 6:	 mdice = 0.6187839178945775
+organ 7:	 mdice = 0.30990396037610485
+organ 8:	 mdice = 0.05090994665829934
+organ 9:	 mdice = 0.07546340793628999
+organ 10:	 mdice = 0.04637475265107311
+organ 11:	 mdice = 0.0476178324444331
+organ 12:	 mdice = 0.0
+organ 13:	 mdice = 0.0
+The average mdice of different organs: 0.1542636302061933
+
+The segmentation result of sample 1:
+organ 1:	 mdice = 0.00047813406009710466
+organ 2:	 mdice = 0.180604001170196
+organ 3:	 mdice = 0.10543526573115754
+organ 4:	 mdice = 0.0
+organ 5:	 mdice = 0.0
+organ 6:	 mdice = 0.4690961458751939
+organ 7:	 mdice = 0.06362002986746314
+organ 8:	 mdice = 0.00806033102564952
+organ 9:	 mdice = 0.004974159662094374
+organ 10:	 mdice = 0.00012393493415956624
+organ 11:	 mdice = 0.0
+organ 12:	 mdice = 0.0
+organ 13:	 mdice = 0.0
+The average mdice of different organs: 0.06403015402507778
+
+The segmentation result of sample 2:
+organ 1:	 mdice = 0.048207839160067475
+organ 2:	 mdice = 0.5140177048196454
+organ 3:	 mdice = 0.25082560254213365
+organ 4:	 mdice = 0.0
+organ 5:	 mdice = 0.04336717077549893
+organ 6:	 mdice = 0.44145332981437496
+organ 7:	 mdice = 0.22772196676071554
+organ 8:	 mdice = 0.30975563909774434
+organ 9:	 mdice = 0.03528655524731037
+organ 10:	 mdice = 0.00024430464789592624
+organ 11:	 mdice = 0.040010350936560704
+organ 12:	 mdice = 0.0
+organ 13:	 mdice = 0.0
+The average mdice of different organs: 0.1469915741386113
+
+The segmentation result of sample 3:
+organ 1:	 mdice = 0.039541130210324044
+organ 2:	 mdice = 0.2514006276352015
+organ 3:	 mdice = 0.2291698180668051
+organ 4:	 mdice = 0.0
+organ 5:	 mdice = 0.01949340492587837
+organ 6:	 mdice = 0.6018790660068725
+organ 7:	 mdice = 0.547514350373934
+organ 8:	 mdice = 0.11930235064115392
+organ 9:	 mdice = 0.045262372544143246
+organ 10:	 mdice = 0.0
+organ 11:	 mdice = 0.03799178699165452
+organ 12:	 mdice = 0.0005320563979781857
+organ 13:	 mdice = 0.0
+The average mdice of different organs: 0.14554515106107274
+
+The segmentation result of sample 4:
+organ 1:	 mdice = 0.41881989472386105
+organ 2:	 mdice = 0.012051525209419947
+organ 3:	 mdice = 0.028026905829596414
+organ 4:	 mdice = 0.054350115862650095
+organ 5:	 mdice = 0.0
+organ 6:	 mdice = 0.7534183602302155
+organ 7:	 mdice = 0.44668744243555936
+organ 8:	 mdice = 0.0003834355828220859
+organ 9:	 mdice = 0.003235294117647059
+organ 10:	 mdice = 0.012642930184995817
+organ 11:	 mdice = 0.003057770012012668
+organ 12:	 mdice = 0.0
+organ 13:	 mdice = 0.0
+The average mdice of different organs: 0.13328259032221385
+
+The segmentation result of sample 5:
+organ 1:	 mdice = 0.06038079344610483
+organ 2:	 mdice = 0.17531993817619784
+organ 3:	 mdice = 0.09741469112030052
+organ 4:	 mdice = 0.0
+organ 5:	 mdice = 0.0
+organ 6:	 mdice = 0.46872107335760854
+organ 7:	 mdice = 0.43388516796527227
+organ 8:	 mdice = 0.0018960100751484286
+organ 9:	 mdice = 0.0
+organ 10:	 mdice = 0.0004807230074031343
+organ 11:	 mdice = 0.0035318275154004107
+organ 12:	 mdice = 0.0
+organ 13:	 mdice = 0.0
+The average mdice of different organs: 0.09551001728180276
+
+overall average mdice score: 0.12327051950582862

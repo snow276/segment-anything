@@ -33,11 +33,13 @@ def create_arg_parser():
         type=str,
         default=None,
         choices=['single_point_center', 'single_point_random', 
-                 'multi_point_center', 'multi_point_random', 
+                 'multi_point_center', 'multi_point_random',
+                 'grid_point_dense', 'grid_point_sparse',
                  'bounding_box_tight', 'bounding_box_loose'],
         help="The type of point prompt, in [ \
                 'single_point_center', 'single_point_random', \
                 'multi_point_center', 'multi_point_random', \
+                'grid_point_dense', 'grid_point_sparse', \
                 'bounding_box_tight', 'bounding_box_loose']."
     )
 

@@ -6,6 +6,12 @@ class PromptGenerator:
     def __init__(self) -> None:
         pass
 
+    def prepare_grid(self, h, w, dist):
+        x_coords = np.arange(0, w, dist)
+        y_coords = np.arange(0, h, dist)
+        xx, yy = np.meshgrid(x_coords, y_coords)
+        self.grid_points: np.ndarray = np.stack([xx.flatten(), yy.flatten()], axis=1).astype(np.int32)
+
     def generate_prompt(self,
                         label: np.ndarray,  # ground truth
                         prompt_type: str):
@@ -13,6 +19,11 @@ class PromptGenerator:
         point_labels = []
         boxes = []
         targets = []
+
+        if prompt_type == "grid_point_dense":
+            self.prepare_grid(h=label.shape[0], w=label.shape[1], dist=1)
+        elif prompt_type == "grid_point_sparse":
+            self.prepare_grid(h=label.shape[0], w=label.shape[1], dist=10)
 
         for i in range(1, 14):
             mask_i = (label == i)
@@ -42,6 +53,17 @@ class PromptGenerator:
                 # 对每个 ground truth mask，生成多点 point prompt，都位于 mask 的随机位置
                 point_coord = self.generate_point_prompt(label=mask_i, num_points=3, center=False)
                 point_label = np.ones((point_coord.shape[0], ), dtype=np.int8)
+                point_coords.append(point_coord)
+                point_labels.append(point_label)
+            elif prompt_type == "grid_point_dense":
+                # 把每个像素点都作为 prompt （但这个要好多好多显存，估计跑不起来）
+                point_coord, point_label = self.generate_grid_point_prompt(label=mask_i)
+                point_coords.append(point_coord)
+                point_labels.append(point_label)
+            elif prompt_type == "grid_point_sparse":
+                # 稍微有一些间距的 grid point prompt 
+                # （间距目前默认设置为了 10，在当前函数 for 循环之前，调用 self.prepare_grid() 时设置）
+                point_coord, point_label = self.generate_grid_point_prompt(label=mask_i)
                 point_coords.append(point_coord)
                 point_labels.append(point_label)
             elif prompt_type == "bounding_box_tight":
@@ -104,6 +126,14 @@ class PromptGenerator:
         
         return selected_points
 
+    def generate_grid_point_prompt(self, label: np.ndarray):
+        coords = self.grid_points
+        labels = np.zeros((coords.shape[0], ), dtype=np.int8)
+
+        for i in range(coords.shape[0]):
+            labels[i] = label[coords[i, 1], coords[i, 0]]
+
+        return coords, labels
 
     def generate_box_prompt(self, 
                             label: np.ndarray, 

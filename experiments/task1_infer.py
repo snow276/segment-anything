@@ -17,6 +17,7 @@ import math
 from tqdm import tqdm
 sys.path.append('..')
 import data_proc
+import torch.nn.functional as F
     
 def get_3d_segment(labels, range_start, used_targets, output):
     segment_result = np.zeros((14, *labels.shape), dtype=np.int8)
@@ -33,6 +34,40 @@ def compute_mdice(dice_dict):
             count += 1
             sum += val
     return sum / count
+
+def show_seg_result(image, mask, idx):
+    import matplotlib.pyplot as plt
+    import matplotlib.patches as patches
+    fig, ax = plt.subplots(1)
+ 
+    cmap = plt.get_cmap('rainbow')
+    print(f"id: {idx}")
+    print(f"mask shape: {mask.shape}")
+    for i in range(mask.shape[0]):
+        mask_i = mask[i]
+        # change mask_i to 0/1
+        mask_i = mask_i > 0.5
+        if mask_i.sum() == 0:
+            print(f"mask {i} is empty")
+            continue
+        if i == 0:
+            pass
+        color = cmap(i / mask.shape[0])
+        # set mask to color
+     
+        mask_i = mask_i.cpu().numpy()
+        print(f"image type: {type(image)}")
+        print(f"color type: {type(color)}")
+        print(f"mask_i type: {type(mask_i)}")
+        color = torch.tensor(color[:3]).to(image.device)
+        image = image.double()
+        image = (image - image.min()) / (image.max() - image.min())
+        
+        image[mask_i] = color
+    ax.imshow(image)
+    plt.savefig(f"results_visualize/seg_result_{idx}.png")
+    plt.cla()
+    plt.close()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Command-line arguments for '
@@ -56,6 +91,10 @@ if __name__ == '__main__':
                         help='how many 2D slice to copy to GPU at a time')
     parser.add_argument('--seed', type=int, default=42,
                         help='random seed')
+    parser.add_argument('--grid_prompt', action='store_true',
+                        help='whether to use grid prompt')
+    parser.add_argument('--grid_distance', type=int, default=16,
+                        help='grid distance of the grid prompt')
     args = parser.parse_args()
 
     random.seed(args.seed)
@@ -63,7 +102,7 @@ if __name__ == '__main__':
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed_all(args.seed)
 
-    training_data, training_labels = data_proc.load_dataset('training', args.json_path, args.data_dir)
+    # training_data, training_labels = data_proc.load_dataset('training', args.json_path, args.data_dir)
     validation_data, validation_labels = data_proc.load_dataset('validation', args.json_path, args.data_dir)
     sam = utils.get_sam(device=args.device)
 
@@ -75,62 +114,73 @@ if __name__ == '__main__':
     training_dices = []
     validation_dices = []
 
-    print("Segmenting on training dataset...", file=sys.stderr)
-    for i_sample, (data, label) in enumerate(zip(training_data, training_labels)):
-        print(f"Sample {i_sample}:")
-        split_ranges = list(range(0, data.shape[-1], args.batch_size)) + [data.shape[-1]]
-        segment_results = []
-        for idx in tqdm(range(len(split_ranges) - 1)):
-            next_range = range(split_ranges[idx], split_ranges[idx + 1])
-            used_targets, batched_input = data_proc.prepare_input(
-                sam, data, label, next_range, 
-                args.point_prompt, args.bounding_box_prompt, args.box_margin
-            )
-            # print()
-            # print(idx)
-            # print(batched_input)
-            if len(batched_input) == 0:
-                segment_results.append(np.zeros((14, *label[..., next_range].shape), dtype=np.int8))
-                torch.cuda.empty_cache()
-                continue
-            output = sam(batched_input, multimask_output=False)
-            segment_result = get_3d_segment(label[..., next_range], 
-                                            split_ranges[idx],
-                                            used_targets, output)
-            segment_results.append(segment_result)
-            torch.cuda.empty_cache()
-        segment_result = np.concatenate(segment_results, axis=-1)
+    # print("Segmenting on training dataset...", file=sys.stderr)
+    # for i_sample, (data, label) in enumerate(zip(training_data, training_labels)):
+    #     print(f"Sample {i_sample}:")
+    #     split_ranges = list(range(0, data.shape[-1], args.batch_size)) + [data.shape[-1]]
+    #     segment_results = []
+    #     for idx in tqdm(range(len(split_ranges) - 1)):
+    #         next_range = range(split_ranges[idx], split_ranges[idx + 1])
+    #         used_targets, batched_input = data_proc.prepare_input(
+    #             sam, data, label, next_range, 
+    #             args.point_prompt, args.bounding_box_prompt, args.box_margin
+    #         )
+    #         # print()
+    #         # print(idx)
+    #         # print(batched_input)
+    #         if len(batched_input) == 0:
+    #             segment_results.append(np.zeros((14, *label[..., next_range].shape), dtype=np.int8))
+    #             torch.cuda.empty_cache()
+    #             continue
+    #         output = sam(batched_input, multimask_output=False)
+    #         segment_result = get_3d_segment(label[..., next_range], 
+    #                                         split_ranges[idx],
+    #                                         used_targets, output)
+    #         segment_results.append(segment_result)
+    #         torch.cuda.empty_cache()
+    #     segment_result = np.concatenate(segment_results, axis=-1)
 
-        dice_dict = {}
-        for target in range(1, 14):
-            truth = utils.select_label(label, target)
-            if truth.sum() == 0:
-                dice_dict[target] = float('nan')
-                continue
-            pred = segment_result[target]
-            dice_dict[target] = utils.dice_score(pred, truth)
+    #     dice_dict = {}
+    #     for target in range(1, 14):
+    #         truth = utils.select_label(label, target)
+    #         if truth.sum() == 0:
+    #             dice_dict[target] = float('nan')
+    #             continue
+    #         pred = segment_result[target]
+    #         dice_dict[target] = utils.dice_score(pred, truth)
 
-        print("Dice scores: ")
-        print(dice_dict)
-        print(f"mDice:  {compute_mdice(dice_dict)}")
-        torch.cuda.empty_cache()
+    #     print("Dice scores: ")
+    #     print(dice_dict)
+    #     print(f"mDice:  {compute_mdice(dice_dict)}")
+    #     torch.cuda.empty_cache()
 
     print("Segmenting on validation dataset...", file=sys.stderr)
+    visualize_cnt = 0
+    visualize_dict = []
     for i_sample, (data, label) in enumerate(zip(validation_data, validation_labels)):
         print(f"Sample {i_sample}:")
         split_ranges = list(range(0, data.shape[-1], args.batch_size)) + [data.shape[-1]]
         segment_results = []
         for idx in tqdm(range(len(split_ranges) - 1)):
             next_range = range(split_ranges[idx], split_ranges[idx + 1])
-            used_targets, batched_input = data_proc.prepare_input(
-                sam, data, label, next_range, 
-                args.point_prompt, args.bounding_box_prompt, args.box_margin
-            )
+            if args.grid_prompt:
+                used_targets, batched_input = data_proc.prepare_grid_input(
+                    sam, data, label, next_range, 
+                    args.grid_distance
+                )
+            else:
+                used_targets, batched_input = data_proc.prepare_input(
+                    sam, data, label, next_range, 
+                    args.point_prompt, args.bounding_box_prompt, args.box_margin
+                )
             if len(batched_input) == 0:
                 segment_results.append(np.zeros((14, *label[..., next_range].shape), dtype=np.int8))
                 torch.cuda.empty_cache()
                 continue
             output = sam(batched_input, multimask_output=False)
+            if visualize_cnt < 140:
+                visualize_dict.append((batched_input[0]['image'], output[0]['masks']))
+                visualize_cnt += 1
             segment_result = get_3d_segment(label[..., next_range], 
                                             split_ranges[idx],
                                             used_targets, output)
@@ -152,4 +202,21 @@ if __name__ == '__main__':
         print(f"mDice:  {compute_mdice(dice_dict)}")
         torch.cuda.empty_cache()
 
-
+        if i_sample == 0:
+            break
+        
+    
+    for i in range(len(visualize_dict)):
+        image, mask = visualize_dict[i]
+        image = image.cpu()
+       
+    
+        image = image.permute(1, 2, 0)
+        mask = mask.float()
+        mask = F.interpolate(mask, size=(image.shape[0], image.shape[1]), mode='nearest')
+        mask = mask.squeeze(1)
+    
+      
+        show_seg_result(image, mask, i)
+     
+    
